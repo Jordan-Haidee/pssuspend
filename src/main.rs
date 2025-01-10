@@ -10,22 +10,15 @@ fn suspend_process(pid: u32) -> bool {
         return false;
     }
     let suspend_status = unsafe { NtSuspendProcess(process_handle) };
-    if suspend_status != 0 {
-        return false;
-    }
-    return true;
+    suspend_status == 0
 }
 fn resume_process(pid: u32) -> bool {
     let process_handle = unsafe { OpenProcess(PROCESS_SUSPEND_RESUME, 0, pid) };
-
     if process_handle == NULL {
         return false;
     }
-    let suspend_status = unsafe { NtResumeProcess(process_handle) };
-    if suspend_status != 0 {
-        return false;
-    }
-    return true;
+    let resume_status = unsafe { NtResumeProcess(process_handle) };
+    resume_status == 0
 }
 
 fn main() {
