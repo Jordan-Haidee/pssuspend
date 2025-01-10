@@ -13,7 +13,6 @@ fn suspend_process(pid: u32) -> bool {
     if suspend_status != 0 {
         return false;
     }
-    println!("Process {} has been suspended successfully!", pid);
     return true;
 }
 fn resume_process(pid: u32) -> bool {
@@ -26,7 +25,6 @@ fn resume_process(pid: u32) -> bool {
     if suspend_status != 0 {
         return false;
     }
-    println!("Process {} has been resumed successfully!", pid);
     return true;
 }
 
@@ -36,15 +34,19 @@ fn main() {
     match args.len() {
         2 => {
             let pid = args[1].parse::<u32>().expect("failed to parse pid!");
-            if !suspend_process(pid) {
-                println!("failed to suspend process");
+            if suspend_process(pid) {
+                println!("process {} has been suspended successfully!", pid);
+            } else {
+                println!("failed to suspend process {}", pid);
             }
         }
         3 => {
             assert!(args[1].as_str() == "-r");
             let pid = args[2].parse::<u32>().expect("failed to parse pid!");
-            if !resume_process(pid) {
-                println!("failed to resume process");
+            if resume_process(pid) {
+                println!("process {} has been resumed successfully!", pid);
+            } else {
+                println!("failed to resume process {}", pid);
             }
         }
         _ => println!("uncorrect input args!"),
