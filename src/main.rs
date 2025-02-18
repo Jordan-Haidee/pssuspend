@@ -1,3 +1,4 @@
+use clap::{value_parser, Arg, ArgAction, Command};
 use ntapi::ntpsapi::{NtResumeProcess, NtSuspendProcess};
 use winapi::{
     shared::ntdef::NULL,
@@ -22,26 +23,37 @@ fn resume_process(pid: u32) -> bool {
 }
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    // dbg!(&args);
-    match args.len() {
-        2 => {
-            let pid = args[1].parse::<u32>().expect("failed to parse pid!");
-            if suspend_process(pid) {
+    let matches = Command::new("pssuspend")
+        .about("An alternative to sysinternals/pssuspend tool on Windows platform.")
+        .arg(
+            Arg::new("resume")
+                .short('r')
+                .long("resume")
+                .action(ArgAction::SetTrue)
+                .help("whether to resume the process."),
+        )
+        .arg(
+            Arg::new("pid")
+                .required(true)
+                .value_parser(value_parser!(u32))
+                .index(1)
+                .help("the process id to be suspended or resumed."),
+        )
+        .get_matches();
+    let resume_flag = matches.get_flag("resume");
+    if let Some(pid) = matches.get_one::<u32>("pid") {
+        if resume_flag {
+            if resume_process(*pid) {
+                println!("process {} has been resumed successfully!", pid);
+            } else {
+                println!("failed to resume process {}", pid);
+            }
+        } else {
+            if suspend_process(*pid) {
                 println!("process {} has been suspended successfully!", pid);
             } else {
                 println!("failed to suspend process {}", pid);
             }
         }
-        3 => {
-            assert!(args[1].as_str() == "-r");
-            let pid = args[2].parse::<u32>().expect("failed to parse pid!");
-            if resume_process(pid) {
-                println!("process {} has been resumed successfully!", pid);
-            } else {
-                println!("failed to resume process {}", pid);
-            }
-        }
-        _ => println!("uncorrect input args!"),
     }
 }
